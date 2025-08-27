@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <title>AI 小红书图文生成器</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <style>
+    *{box-sizing:border-box;font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Helvetica Neue",sans-serif}
+    body{margin:0;padding:20px;background:#fafafa;color:#333;line-height:1.6}
+    h2{margin-top:0;color:#ff2442}
+    input,button{width:100%;padding:14px 12px;font-size:16px;border-radius:6px;border:1px solid #ccc}
+    button{background:#ff2442;color:#fff;border:none;margin-top:10px}
+    .loading{margin:20px 0;text-align:center;color:#888}
+    .card{background:#fff;border-radius:8px;padding:12px;margin:12px 0;box-shadow:0 1px 4px rgba(0,0,0,.08)}
+    .card img{width:100%;border-radius:6px;margin-top:8px}
+  </style>
+</head>
+<body>
+  <h2>输入主题，一键生成小红书风图文</h2>
+  <input id="topic" placeholder="例：如何克服拖延" />
+  <button onclick="generate()">立即生成</button>
+  <div id="result"></div>
+
+  <script>
+    async function generate() {
+      const topic = document.getElementById('topic').value.trim();
+      if (!topic) return alert('请输入主题');
+      document.getElementById('result').innerHTML = '<div class="loading">生成中，请稍候...</div>';
+
+      try {
+        // ✅ 你的真实 Coze 工作流域名（末尾无需斜杠）
+        const res = await fetch('https://psychology-generate-180919-4-1374892393.sh.run.tcloudbase.com', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ topic })
+        });
+
+        if (!res.ok) throw new Error('网络错误 ' + res.status);
+        const data = await res.json();
+
+        // 简单容错：如果后端字段名不同，按实际情况再改
+        let html = `<div class="card"><h3>${data.title || '标题'}</h3><img src="${data.cover}" alt="封面" /></div>`;
+        (data.pages || []).forEach(p => {
+          html += `<div class="card"><p>${p.text || ''}</p><img src="${p.image || ''}" alt="配图" /></div>`;
+        });
+
+        document.getElementById('result').innerHTML = html;
+      } catch (e) {
+        console.error(e);
+        document.getElementById('result').innerHTML = '<div class="loading" style="color:red;">生成失败，请重试</div>';
+      }
+    }
+  </script>
+</body>
+</html>
