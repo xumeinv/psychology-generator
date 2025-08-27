@@ -28,8 +28,8 @@
       document.getElementById('result').innerHTML = '<div class="loading">生成中，请稍候...</div>';
 
       try {
-        // ✅ 你的真实 Coze 工作流域名（末尾无需斜杠）
-        const res = await fetch('https://psychology-generate-180919-4-1374892393.sh.run.tcloudbase.com', {
+        // ✅ 使用API代理调用 Coze 工作流
+        const res = await fetch('/api/proxy', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ topic })
