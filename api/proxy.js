@@ -26,13 +26,19 @@ export default async function handler(req, res) {
 
     console.log('收到生成请求:', topic);
 
-    // 调用Coze工作流
-    const cozeResponse = await fetch('https://psychology-generate-180919-4-1374892393.sh.run.tcloudbase.com', {
+    // 调用Coze官方API
+    const cozeResponse = await fetch('https://api.coze.cn/v1/workflow/stream_run', {
       method: 'POST',
       headers: {
+        'Authorization': 'Bearer cztei_qtNbENPDXPH2UtqjxI8uMk8MTPVyU7m7sslSOINAG0eBaz68nur4d2t88gIc8zG3j',
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify({ topic: topic.trim() })
+      body: JSON.stringify({
+        workflow_id: '7540699198652694574',
+        parameters: {
+          input: topic.trim()
+        }
+      })
     });
 
     if (!cozeResponse.ok) {
@@ -52,4 +58,4 @@ export default async function handler(req, res) {
       details: error.message 
     });
   }
-}
+} 
