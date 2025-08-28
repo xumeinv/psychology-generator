@@ -26,7 +26,10 @@ export default async function handler(req, res) {
 
     console.log('收到生成请求:', topic);
 
-    // 调用Coze官方API
+    // 调用Coze官方API，设置超时
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 140000); // 140秒超时
+
     const cozeResponse = await fetch('https://api.coze.cn/v1/workflow/stream_run', {
       method: 'POST',
       headers: {
@@ -38,8 +41,11 @@ export default async function handler(req, res) {
         parameters: {
           input: topic.trim()
         }
-      })
+      }),
+      signal: controller.signal
     });
+
+    clearTimeout(timeoutId);
 
     if (!cozeResponse.ok) {
       throw new Error(`Coze API错误: ${cozeResponse.status}`);
@@ -53,9 +59,17 @@ export default async function handler(req, res) {
 
   } catch (error) {
     console.error('代理请求失败:', error.message);
-    res.status(500).json({ 
-      error: '生成失败，请重试',
-      details: error.message 
-    });
+    
+    if (error.name === 'AbortError') {
+      res.status(504).json({ 
+        error: '请求超时，请重试',
+        details: 'Coze API响应时间过长'
+      });
+    } else {
+      res.status(500).json({ 
+        error: '生成失败，请重试',
+        details: error.message 
+      });
+    }
   }
 } 
